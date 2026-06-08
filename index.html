@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela da Copa do Mundo 2026</title>
+	<meta name="theme-color" content="#060b14">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado!', reg))
+                .catch(err => console.error('Erro ao registrar Service Worker', err));
+            });
+        }
+    </script>
+    <style>
+        :root {
+            --bg-main: #060b14;
+            --bg-card: rgba(19, 28, 46, 0.6);
+            --bg-input: #111b2e;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+            --accent-primary: #00ff87;
+            --accent-secondary: #00d4ff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at top, #111b2e 0%, var(--bg-main) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #2a3b5c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-secondary); }
+
+        /* Cabeçalho */
+        .dashboard-header {
+            max-width: 1500px; margin: 0 auto 30px auto; display: flex;
+            justify-content: space-between; align-items: center; gap: 20px;
+        }
+        .dashboard-header h1 { 
+            font-size: 2.2rem; margin: 0; font-weight: 800; 
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .dashboard-header p { color: var(--text-muted); margin: 8px 0 0 0; font-size: 0.95rem; }
+
+        .actions-wrapper { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .btn-action {
+            background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent-secondary); color: var(--accent-secondary);
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            transition: all 0.3s ease; display: inline-block; text-align: center;
+        }
+        .btn-action:hover { background: var(--accent-secondary); color: #060b14; box-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
+        
+        .btn-export { background: rgba(0, 255, 135, 0.1); border: 1px solid var(--accent-primary); color: var(--accent-primary); }
+        .btn-export:hover { background: var(--accent-primary); color: #060b14; box-shadow: 0 0 15px rgba(0, 255, 135, 0.4); }
+
+        .btn-reset {
+            background: rgba(255, 61, 0, 0.1); border: 1px solid #ff3d00; color: #ff3d00;
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;
+        }
+        .btn-reset:hover { background: #ff3d00; color: white; box-shadow: 0 0 15px rgba(255, 61, 0, 0.4); }
+
+        /* Sistema de Abas */
+        .tabs-nav {
+            max-width: 1500px; margin: 0 auto 30px auto;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .tab-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 12px 24px; font-size: 1.05rem; font-weight: 600; cursor: pointer;
+            border-radius: 8px 8px 0 0; transition: all 0.3s ease; white-space: nowrap;
+            position: relative;
+        }
+        .tab-btn::after {
+            content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px;
+            background: transparent; border-radius: 3px 3px 0 0; transition: all 0.3s ease;
+        }
+        .tab-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+        .tab-btn.active { color: var(--accent-primary); }
+        .tab-btn.active::after { background: var(--accent-primary); box-shadow: 0 0 10px rgba(0, 255, 135, 0.5); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease; max-width: 1500px; margin: 0 auto; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Grids Genéricos */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 25px; }
+
+        /* Cartões */
+        .grupo-card, .card-mata-mata {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px; border: 1px solid var(--border-color); padding: 20px;
+            box-shadow: var(--card-shadow); transition: transform 0.3s ease, border-color 0.3s;
+        }
+        .grupo-card:hover, .card-mata-mata:hover { transform: translateY(-3px); border-color: rgba(0, 212, 255, 0.3); }
+        .grupo-title { font-size: 1.2rem; color: var(--accent-secondary); margin: 0 0 20px 0; font-weight: 800; text-align: center; }
+        
+        .jogo-status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; margin-bottom: 8px; padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.03); border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .jogo-id-label { font-size: 0.65rem; color: var(--accent-secondary); font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .jogo-data-label { font-size: 0.7rem; color: var(--accent-primary); font-weight: 600; }
+
+        .card-mata-mata .jogo-status-bar {
+            background: rgba(0, 212, 255, 0.05); border-color: rgba(0, 212, 255, 0.1); margin-bottom: 15px;
+        }
+
+        .jogo-bloco-wrapper { width: 100%; margin-bottom: 15px; }
+        .jogo-bloco-wrapper:last-of-type { margin-bottom: 0; }
+        .jogo-linha { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .time-box { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+        .time-box.mandante { justify-content: flex-end; }
+        .time-box.visitante { justify-content: flex-start; }
+
+        .flag { width: 26px; height: 18px; object-fit: cover; border-radius: 3px; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+        .time-nome { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .time-nome.placeholder { color: var(--text-muted); font-weight: 400; font-style: italic; }
+
+        .placar-wrapper { display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+        .input-placar {
+            width: 40px; height: 36px; background-color: var(--bg-input);
+            border: 1px solid rgba(255,255,255,0.1); color: var(--accent-primary);
+            text-align: center; font-size: 1.2rem; font-weight: 700; border-radius: 6px; 
+            outline: none; transition: all 0.2s;
+        }
+        .input-placar:focus { border-color: var(--accent-primary); box-shadow: 0 0 8px rgba(0, 255, 135, 0.3); }
+        .input-placar::-webkit-outer-spin-button, .input-placar::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .vs-divisor { color: var(--text-muted); font-size: 0.8rem; font-weight: bold; }
+
+        /* Tabela de Classificação */
+        .tabela-classificacao { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
+        .tabela-classificacao th { color: var(--text-muted); text-align: center; padding: 8px 4px; border-bottom: 1px solid var(--border-color); font-weight: 600; }
+        .tabela-classificacao th:nth-child(2) { text-align: left; }
+        .tabela-classificacao td { padding: 8px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .tabela-classificacao td:nth-child(2) { text-align: left; font-weight: 600; }
+        .tabela-classificacao tr:nth-child(1) td, .tabela-classificacao tr:nth-child(2) td { background: rgba(0, 255, 135, 0.05); }
+        .tabela-classificacao tr:nth-child(3) td { background: rgba(0, 212, 255, 0.05); }
+        .tabela-classificacao tr:nth-child(1) td:first-child, .tabela-classificacao tr:nth-child(2) td:first-child { color: var(--accent-primary); font-weight: bold; }
+        .tabela-classificacao tr:nth-child(3) td:first-child { color: var(--accent-secondary); font-weight: bold; }
+
+        .alert-tie { font-size: 0.8rem; color: #ffab00; text-align: center; margin-top: 12px; display: none; width: 100%; }
+
+        @media (max-width: 1024px) { .dashboard-header { flex-direction: column; text-align: center; gap: 20px; } .actions-wrapper { justify-content: center; } }
+        @media (max-width: 768px) { body { padding: 10px; } .grid-container { grid-template-columns: 1fr; } .tab-btn { padding: 10px 16px; font-size: 0.95rem; } .placar-wrapper { padding: 0 6px; } }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <div>
+            <h1>Copa do Mundo 2026™</h1>
+            <p>Simulador Dinâmico • Cruzamento de Rodadas Corrigido pela FIFA</p>
+        </div>
+        <div class="actions-wrapper">
+            <button class="btn-action btn-export" onclick="exportarBackup()">💾 Exportar</button>
+            <label for="input-import" class="btn-action">📂 Importar</label>
+            <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none">
+            <button class="btn-reset" onclick="limparTudo()">Limpar Tudo</button>
+        </div>
+    </div>
+
+    <div class="tabs-nav" id="tabs-header">
+        <button class="tab-btn active" onclick="abrirAba('grupos', this)">Fase de Grupos</button>
+    </div>
+
+    <div id="tab-grupos" class="tab-content active">
+        <div class="grid-container" id="container-grupos"></div>
+    </div>
+    
+    <div id="container-tabs-mata"></div>
+
+    <script>
+        const gruposConfig = {
+            "Grupo A": ["México", "África do Sul", "Coreia do Sul", "República Tcheca"],
+            "Grupo B": ["Canadá", "Bósnia e Herz.", "Catar", "Suíça"],
+            "Grupo C": ["Brasil", "Marrocos", "Haiti", "Escócia"],
+            "Grupo D": ["EUA", "Paraguai", "Austrália", "Turquia"],
+            "Grupo E": ["Alemanha", "Curaçau", "Costa do Marfim", "Equador"],
+            "Grupo F": ["Holanda", "Japão", "Suécia", "Tunísia"],
+            "Grupo G": ["Bélgica", "Egito", "Irã", "Nova Zelândia"],
+            "Grupo H": ["Espanha", "Cabo Verde", "Arábia Saudita", "Uruguai"],
+            "Grupo I": ["França", "Senegal", "Iraque", "Noruega"],
+            "Grupo J": ["Argentina", "Argélia", "Áustria", "Jordânia"],
+            "Grupo K": ["Portugal", "R. D. Congo", "Uzbequistão", "Colômbia"],
+            "Grupo L": ["Inglaterra", "Croácia", "Gana", "Panamá"]
+        };
+
+        const flags = {
+            "México": "mx", "África do Sul": "za", "Coreia do Sul": "kr", "República Tcheca": "cz",
+            "Canadá": "ca", "Bósnia e Herz.": "ba", "Catar": "qa", "Suíça": "ch",
+            "Brasil": "br", "Marrocos": "ma", "Haiti": "ht", "Escócia": "gb-sct",
+            "EUA": "us", "Paraguai": "py", "Austrália": "au", "Turquia": "tr",
+            "Alemanha": "de", "Curaçau": "cw", "Costa do Marfim": "ci", "Equador": "ec",
+            "Holanda": "nl", "Japão": "jp", "Suécia": "se", "Tunísia": "tn",
+            "Bélgica": "be", "Egito": "eg", "Irã": "ir", "Nova Zelândia": "nz",
+            "Espanha": "es", "Cabo Verde": "cv", "Arábia Saudita": "sa", "Uruguai": "uy",
+            "França": "fr", "Senegal": "sn", "Iraque": "iq", "Noruega": "no",
+            "Argentina": "ar", "Argélia": "dz", "Áustria": "at", "Jordânia": "jo",
+            "Portugal": "pt", "R. D. Congo": "cd", "Uzbequistão": "uz", "Colômbia": "co",
+            "Inglaterra": "gb-eng", "Croácia": "hr", "Gana": "gh", "Panamá": "pa"
+        };
+
+        const fasesMata = [
+            { id: 'fase16', nome: '16-Avos', qtd: 16 },
+            { id: 'oitavas', nome: 'Oitavas', qtd: 8 },
+            { id: 'quartas', nome: 'Quartas', qtd: 4 },
+            { id: 'semis', nome: 'Semifinais', qtd: 2 },
+            { id: 'final', nome: 'Final', qtd: 1 }
+        ];
+
+        // Cruzamento Real de Grupos com 4 times divididos em 3 Rodadas (Formato FIFA)
+        // Ordem: Rodada 1 (A x B, C x D), Rodada 2 (A x C, B x D), Rodada 3 (A x D, B x C)
+        const confrontosOficiais = [[0,1], [2,3], [0,2], [1,3], [0,3], [1,2]];
+
+        const datasGrupos = {
+            "Grupo A": ["11/06 - 16:00", "11/06 - 23:00", "18/06 - 19:00", "19/06 - 22:00", "24/06 - 17:00", "24/06 - 17:00"],
+            "Grupo B": ["12/06 - 16:00", "13/06 - 16:00", "18/06 - 22:00", "19/06 - 19:00", "24/06 - 21:00", "24/06 - 21:00"],
+            "Grupo C": ["13/06 - 19:00", "13/06 - 22:00", "19/06 - 16:00", "20/06 - 16:00", "24/06 - 17:00", "24/06 - 17:00"],
+            "Grupo D": ["12/06 - 22:00", "14/06 - 01:00", "19/06 - 19:00", "20/06 - 19:00", "25/06 - 17:00", "25/06 - 17:00"],
+            "Grupo E": ["14/06 - 14:00", "14/06 - 20:00", "20/06 - 17:00", "21/06 - 17:00", "25/06 - 21:00", "25/06 - 21:00"],
+            "Grupo F": ["14/06 - 17:00", "14/06 - 23:00", "20/06 - 14:00", "21/06 - 14:00", "25/06 - 20:00", "25/06 - 20:00"],
+            "Grupo G": ["15/06 - 16:00", "15/06 - 22:00", "21/06 - 16:00", "22/06 - 16:00", "26/06 - 17:00", "26/06 - 17:00"],
+            "Grupo H": ["15/06 - 13:00", "15/06 - 19:00", "21/06 - 13:00", "21/06 - 19:00", "26/06 - 21:00", "26/06 - 21:00"],
+            "Grupo I": ["16/06 - 16:00", "16/06 - 19:00", "22/06 - 19:00", "23/06 - 19:00", "26/06 - 21:00", "26/06 - 21:00"],
+            "Grupo J": ["16/06 - 22:00", "17/06 - 01:00", "22/06 - 14:00", "23/06 - 14:00", "27/06 - 17:00", "27/06 - 17:00"],
+            "Grupo K": ["17/06 - 16:00", "17/06 - 19:00", "23/06 - 16:00", "23/06 - 22:00", "27/06 - 18:00", "27/06 - 18:00"],
+            "Grupo L": ["17/06 - 17:00", "17/06 - 20:00", "23/06 - 17:00", "23/06 - 20:00", "27/06 - 18:00", "27/06 - 19:00"]
+        };
+
+        let classificacaoGlobal = {};
+
+        function obterDataHoraMataMata(faseId, jogoNum) {
+            if (faseId === 'fase16') {
+                const dia = 28 + Math.floor((jogoNum - 1) / 3);
+                return `📅 ${dia <= 30 ? dia : '0'+(dia-30)}/${dia <= 30 ? '06' : '07'} - 17:00`;
+            }
+            if (faseId === 'oitavas') {
+                const dia = 4 + Math.floor((jogoNum - 1) / 2);
+                return `📅 0${dia}/07 - 17:00`;
+            }
+            if (faseId === 'quartas') {
+                const dia = 9 + Math.floor((jogoNum - 1) / 2);
+                return `📅 ${dia < 10 ? '0'+dia : dia}/07 - 17:00`;
+            }
+            if (faseId === 'semis') return `📅 ${14 + (jogoNum - 1)}/07 - 21:00`;
+            if (faseId === 'final') return `📅 19/07 - 16:00`;
+            return "";
+        }
+
+        function init() {
+            renderizarGrupos();
+            renderizarMataMataBase();
+            restaurarDados();
+        }
+
+        function abrirAba(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const tabContent = document.getElementById('tab-' + tabId);
+            if(tabContent) tabContent.classList.add('active');
+            if(btn) btn.classList.add('active');
+        }
+
+        function renderizarGrupos() {
+            const container = document.getElementById('container-grupos');
+            if(!container) return;
+
+            Object.keys(gruposConfig).forEach((nomeGrupo, gIdx) => {
+                const times = gruposConfig[nomeGrupo];
+                const card = document.createElement('div');
+                card.className = 'grupo-card';
+
+                let html = `<h2 class="grupo-title">${nomeGrupo}</h2>`;
+                
+                confrontosOficiais.forEach((par, idx) => {
+                    const i = par[0];
+                    const j = par[1];
+                    const jogoCont = idx + 1;
+                    const idJogo = `g${gIdx}_j${jogoCont}`;
+                    const dataHoraStr = datasGrupos[nomeGrupo] ? datasGrupos[nomeGrupo][jogoCont-1] : "Data a definir";
+                    
+                    html += `
+                        <div class="jogo-bloco-wrapper">
+                            <div class="jogo-status-bar">
+                                <span class="jogo-id-label">Rodada ${Math.ceil(jogoCont/2)}</span>
+                                <span class="jogo-data-label">📅 ${dataHoraStr}</span>
+                            </div>
+                            <div class="jogo-linha">
+                                <div class="time-box mandante">
+                                    <span class="time-nome">${times[i]}</span>
+                                    <img class="flag" src="https://flagcdn.com/${flags[times[i]]}.svg">
+                                </div>
+                                <div class="placar-wrapper">
+                                    <input type="number" class="input-placar" id="${idJogo}_m" oninput="salvarEAtualizar(this)">
+                                    <span class="vs-divisor">X</span>
+                                    <input type="number" class="input-placar" id="${idJogo}_v" oninput="salvarEAtualizar(this)">
+                                </div>
+                                <div class="time-box visitante">
+                                    <img class="flag" src="https://flagcdn.com/${flags[times[j]]}.svg">
+                                    <span class="time-nome">${times[j]}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                html += `
+                    <table class="tabela-classificacao">
+                        <thead><tr><th>Pos</th><th>Seleção</th><th>P</th><th>SG</th><th>GP</th></tr></thead>
+                        <tbody id="body-${nomeGrupo.replace(/ /g, '')}"></tbody>
+                    </table>`;
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        function renderizarMataMataBase() {
+            const tabsHeader = document.getElementById('tabs-header');
+            const containerMata = document.getElementById('container-tabs-mata');
+
+            fasesMata.forEach(fase => {
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn';
+                btn.innerText = fase.nome;
+                btn.onclick = function() { abrirAba(fase.id, this); };
+                tabsHeader.appendChild(btn);
+
+                const tabEl = document.createElement('div');
+                tabEl.id = `tab-${fase.id}`;
+                tabEl.className = 'tab-content';
+                
+                let html = `<div class="grid-container">`;
+                for(let k=1; k<=fase.qtd; k++) {
+                    const jogoId = `${fase.id}_j${k}`;
+                    const dataHoraStr = obterDataHoraMataMata(fase.id, k);
+                    
+                    html += `
+                        <div class="card-mata-mata">
+                            <div class="jogo-status-bar">
+                                <span class="jogo-id-label">${fase.nome} • JOGO ${k}</span>
+                                <span class="jogo-data-label">${dataHoraStr}</span>
+                            </div>
+                            <div class="jogo-linha">
+                                <div class="time-box mandante">
+                                    <span class="time-nome placeholder" id="${jogoId}_m_nome">A definir</span>
+                                    <img class="flag" id="${jogoId}_m_flag" style="display:none">
+                                </div>
+                                <div class="placar-wrapper">
+                                    <input type="number" class="input-placar" id="${jogoId}_m_score" oninput="salvarEAtualizarMataMata(this)">
+                                    <span class="vs-divisor">X</span>
+                                    <input type="number" class="input-placar" id="${jogoId}_v_score" oninput="salvarEAtualizarMataMata(this)">
+                                </div>
+                                <div class="time-box visitante">
+                                    <img class="flag" id="${jogoId}_v_flag" style="display:none">
+                                    <span class="time-nome placeholder" id="${jogoId}_v_nome">A definir</span>
+                                </div>
+                            </div>
+                            <div class="alert-tie" id="${jogoId}_alert">Empate! Desempate no placar.</div>
+                        </div>`;
+                }
+                html += `</div>`;
+                tabEl.innerHTML = html;
+                containerMata.appendChild(tabEl);
+            });
+        }
+
+        function salvarEAtualizar(input) { localStorage.setItem(input.id, input.value); processarTodosOsGrupos(); }
+        function salvarEAtualizarMataMata(input) { localStorage.setItem(input.id, input.value); propagarVencedores(); }
+
+        function processarTodosOsGrupos() {
+            Object.keys(gruposConfig).forEach((nomeGrupo, gIdx) => {
+                const times = gruposConfig[nomeGrupo];
+                let stats = {};
+                times.forEach(t => stats[t] = { nome: t, p: 0, sg: 0, gp: 0 });
+
+                confrontosOficiais.forEach((par, idx) => {
+                    const i = par[0];
+                    const j = par[1];
+                    const jogoCont = idx + 1;
+                    
+                    const elM = document.getElementById(`g${gIdx}_j${jogoCont}_m`);
+                    const elV = document.getElementById(`g${gIdx}_j${jogoCont}_v`);
+                    
+                    if(elM && elV && elM.value !== "" && elV.value !== "") {
+                        const gm = parseInt(elM.value, 10); const gv = parseInt(elV.value, 10);
+                        if(!isNaN(gm) && !isNaN(gv)) {
+                            stats[times[i]].gp += gm; stats[times[j]].gp += gv;
+                            stats[times[i]].sg += (gm - gv); stats[times[j]].sg += (gv - gm);
+                            if(gm > gv) stats[times[i]].p += 3;
+                            else if(gv > gm) stats[times[j]].p += 3;
+                            else { stats[times[i]].p += 1; stats[times[j]].p += 1; }
+                        }
+                    }
+                });
+
+                const ordenados = Object.values(stats).sort((a,b) => b.p - a.p || b.sg - a.sg || b.gp - a.gp);
+                classificacaoGlobal[nomeGrupo] = ordenados;
+
+                const tbodyId = `body-${nomeGrupo.replace(/ /g, '')}`;
+                const tbody = document.getElementById(tbodyId);
+                if(tbody) {
+                    tbody.innerHTML = ordenados.map((time, index) => `
+                        <tr>
+                            <td>${index + 1}º</td>
+                            <td><img class="flag" src="https://flagcdn.com/${flags[time.nome]}.svg" style="vertical-align:middle; margin-right:6px; width: 16px;"> ${time.nome}</td>
+                            <td><b>${time.p}</b></td>
+                            <td>${time.sg}</td>
+                            <td>${time.gp}</td>
+                        </tr>`).join('');
+                }
+            });
+            distribuirMataMata();
+        }
+
+        function distribuirMataMata() {
+            let primeiros = [], segundos = [], terceiros = [];
+            Object.keys(classificacaoGlobal).forEach(grupo => {
+                const rank = classificacaoGlobal[grupo];
+                if(rank && rank.length > 0 && (rank[0].p > 0 || rank[0].gp > 0 || rank[1].p > 0)) { 
+                    primeiros.push({ ...rank[0], origem: `1º ${grupo.split(' ')[1]}` });
+                    segundos.push({ ...rank[1], origem: `2º ${grupo.split(' ')[1]}` });
+                    terceiros.push({ ...rank[2], origem: `3º ${grupo.split(' ')[1]}` });
+                } else {
+                    primeiros.push({ nome: null, origem: `1º ${grupo.split(' ')[1]}` });
+                    segundos.push({ nome: null, origem: `2º ${grupo.split(' ')[1]}` });
+                    terceiros.push({ nome: null, origem: `3º ${grupo.split(' ')[1]}` });
+                }
+            });
+
+            const terceirosValidos = terceiros.filter(t => t.nome !== null);
+            terceirosValidos.sort((a,b) => b.p - a.p || b.sg - a.sg || b.gp - a.gp);
+            
+            let melhoresTerceiros = [];
+            for(let i=0; i<8; i++) {
+                if(terceirosValidos[i]) melhoresTerceiros.push(terceirosValidos[i]);
+                else melhoresTerceiros.push({ nome: null, origem: `Melhor 3º (${i+1})` });
+            }
+
+            const matchups = [
+                [primeiros[0], segundos[1]], [primeiros[2], segundos[3]],   
+                [primeiros[4], segundos[5]], [primeiros[6], segundos[7]],   
+                [primeiros[8], segundos[9]], [primeiros[10], segundos[11]], 
+                [segundos[0], segundos[2]], [segundos[4], segundos[6]],    
+                [primeiros[1], melhoresTerceiros[0]], [primeiros[3], melhoresTerceiros[1]], 
+                [primeiros[5], melhoresTerceiros[2]], [primeiros[7], melhoresTerceiros[3]], 
+                [primeiros[9], melhoresTerceiros[4]], [primeiros[11], melhoresTerceiros[5]],
+                [segundos[8], melhoresTerceiros[6]], [segundos[10], melhoresTerceiros[7]]  
+            ];
+
+            matchups.forEach((match, idx) => {
+                setMataMataTeam('fase16', idx + 1, 'm', match[0]);
+                setMataMataTeam('fase16', idx + 1, 'v', match[1]);
+            });
+            propagarVencedores();
+        }
+
+        function setMataMataTeam(faseId, jogoNum, pos, teamData) {
+            const nomeEl = document.getElementById(`${faseId}_j${jogoNum}_${pos}_nome`);
+            const flagEl = document.getElementById(`${faseId}_j${jogoNum}_${pos}_flag`);
+            if(!nomeEl || !flagEl) return;
+            if(!teamData || !teamData.nome) {
+                nomeEl.innerText = teamData ? teamData.origem : "A definir";
+                nomeEl.classList.add('placeholder');
+                flagEl.style.display = 'none';
+            } else {
+                nomeEl.innerText = teamData.nome;
+                nomeEl.classList.remove('placeholder');
+                flagEl.src = `https://flagcdn.com/${flags[teamData.nome]}.svg`;
+                flagEl.style.display = 'block';
+            }
+        }
+
+        function propagarVencedores() {
+            for (let f = 0; f < fasesMata.length - 1; f++) {
+                const currentFase = fasesMata[f].id;
+                const nextFase = fasesMata[f+1].id;
+                const numMatches = fasesMata[f].qtd;
+
+                for (let m = 1; m <= numMatches; m++) {
+                    const elScoreM = document.getElementById(`${currentFase}_j${m}_m_score`);
+                    const elScoreV = document.getElementById(`${currentFase}_j${m}_v_score`);
+                    const elNameM = document.getElementById(`${currentFase}_j${m}_m_nome`);
+                    const elNameV = document.getElementById(`${currentFase}_j${m}_v_nome`);
+                    const alertEl = document.getElementById(`${currentFase}_j${m}_alert`);
+
+                    if(!elScoreM || !elScoreV || !elNameM || !elNameV) continue;
+
+                    const scoreM = elScoreM.value; const scoreV = elScoreV.value;
+                    const nameM = elNameM.innerText; const nameV = elNameV.innerText;
+                    const isPlaceHolderM = elNameM.classList.contains('placeholder');
+                    const isPlaceHolderV = elNameV.classList.contains('placeholder');
+
+                    let winnerObj = null;
+
+                    if (scoreM !== "" && scoreV !== "" && !isPlaceHolderM && !isPlaceHolderV) {
+                        const mVal = parseInt(scoreM, 10); const vVal = parseInt(scoreV, 10);
+                        if(!isNaN(mVal) && !isNaN(vVal)) {
+                            if(mVal > vVal) { winnerObj = { nome: nameM }; alertEl.style.display = 'none'; } 
+                            else if(vVal > mVal) { winnerObj = { nome: nameV }; alertEl.style.display = 'none'; } 
+                            else { alertEl.style.display = 'block'; }
+                        }
+                    } else { if(alertEl) alertEl.style.display = 'none'; }
+
+                    const nextMatch = Math.ceil(m / 2);
+                    const slotPrefix = (m % 2 !== 0) ? 'm' : 'v';
+                    setMataMataTeam(nextFase, nextMatch, slotPrefix, winnerObj || { origem: `Vencedor Jogo ${m}` });
+                }
+            }
+        }
+
+        function restaurarDados() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                const val = localStorage.getItem(input.id);
+                if(val !== null && val !== "null") input.value = val;
+            });
+            processarTodosOsGrupos();
+        }
+
+        function limparTudo() {
+            if(confirm("Tem certeza que deseja apagar todos os placares? Recomendado limpar para atualizar os cruzamentos!")) {
+                localStorage.clear();
+                document.querySelectorAll('input').forEach(i => i.value = '');
+                processarTodosOsGrupos();
+            }
+        }
+
+        function exportarBackup() {
+            const dadosBackup = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const chave = localStorage.key(i);
+                if(chave.includes('_m') || chave.includes('_v') || chave.includes('_score')) {
+                    dadosBackup[chave] = localStorage.getItem(chave);
+                }
+            }
+            if(Object.keys(dadosBackup).length === 0) { alert("Não há placares para exportar."); return; }
+            const blob = new Blob([JSON.stringify(dadosBackup, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = "simulador_copa2026_backup.json";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        }
+
+        function importarBackup(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    localStorage.clear();
+                    document.querySelectorAll('input').forEach(i => i.value = '');
+                    Object.keys(dados).forEach(chave => localStorage.setItem(chave, dados[chave]));
+                    restaurarDados();
+                    alert("Backup carregado com sucesso!");
+                } catch (err) { alert("Erro ao ler o arquivo. Certifique-se de ser um backup válido."); }
+            };
+            leitor.readAsText(arquivo);
+            event.target.value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
