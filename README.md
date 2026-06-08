@@ -15,7 +15,7 @@ Bem-vindo à Tabela Dinâmica da Copa do Mundo de 2026! Este é um aplicativo we
 
 ## 🚀 Como usar e instalar
 
-1. Acesse o link do projeto hospedado: **[INSERIR O LINK DO SEU GITHUB PAGES AQUI]**
+1. Acesse o link do projeto hospedado: (https://curvelojr.github.io/Tabela_da_Copa_FIFA26/)
 2. **No Computador:** Preencha os placares e veja o sistema calcular quem avança até a Grande Final.
 3. **No Celular:** Ao acessar o site, o navegador sugerirá "Adicionar à Tela Inicial" ou "Instalar Aplicativo". Aceite para ter o ícone do simulador junto com seus outros apps!
 
