@@ -21,5 +21,25 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "ScreenShot-001-1920x1080.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "ScreenShot-002-1080x1920.jpeg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "ScreenShot-003-1080x1920.jpeg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
   ]
 }
