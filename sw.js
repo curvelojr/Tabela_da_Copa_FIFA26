@@ -1,9 +1,10 @@
-const CACHE_NAME = 'simulador-copa-v2';
+const CACHE_NAME = 'simulador-copa-v3';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    './rildon-logo.svg'
+    './rildon-logo.svg',
+    './splash.png'
 ];
 
 self.addEventListener('install', event => {

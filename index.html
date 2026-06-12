@@ -44,6 +44,19 @@
 
         * { box-sizing: border-box; }
 
+        /* ── Splash Screen ── */
+        #splash {
+            position: fixed; inset: 0; z-index: 99999;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        #splash img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        #splash.fade-out { opacity: 0; pointer-events: none; }
+
         /* ── Transição de tema ── */
         body,
         .grupo-card, .card-mata-mata,
@@ -258,6 +271,9 @@
     </style>
 </head>
 <body>
+    <div id="splash">
+        <img src="splash.png" alt="Tabela da Copa FIFA 2026">
+    </div>
 
     <!-- Barra de título — sempre escura -->
     <header class="top-bar">
@@ -679,6 +695,15 @@
             leitor.readAsText(arquivo);
             event.target.value = '';
         }
+
+        // Splash screen: 2s visível + 0.5s fade out
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash');
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 500);
+            }, 2000);
+        });
 
         document.addEventListener('DOMContentLoaded', init);
 
