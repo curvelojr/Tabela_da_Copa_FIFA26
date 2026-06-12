@@ -1,10 +1,10 @@
-const CACHE_NAME = 'simulador-copa-v4';
+const CACHE_NAME = 'simulador-copa-v5';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    './rildon-logo.svg',
     './rildon-logo-claro.png',
+    './rildon-logo-escuro.png',
     './splash.png'
 ];
 
