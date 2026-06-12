@@ -1,16 +1,33 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Simulador Oficial Premium - Copa do Mundo 2026</title>
     
-    <meta name="theme-color" content="#060b14">
+    <meta name="theme-color" content="#0d1b2e">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <style>
+        /* ── Tema Claro (padrão) ── */
         :root {
+            --bg-main: #eef4fb;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-input: #ddeeff;
+            --text-main: #1a2d45;
+            --text-muted: #5a7a9a;
+            --accent-primary: #2a7dd4;
+            --accent-secondary: #4aa3e8;
+            --border-color: rgba(100, 160, 220, 0.25);
+            --card-shadow: 0 4px 20px rgba(80, 140, 200, 0.12);
+            --bg-gradient: linear-gradient(160deg, #ddeeff 0%, #eef4fb 50%, #f5f9ff 100%);
+            --scrollbar-track: #ddeeff;
+            --scrollbar-thumb: #a8c8e8;
+        }
+
+        /* ── Tema Escuro ── */
+        [data-theme="dark"] {
             --bg-main: #060b14;
             --bg-card: rgba(19, 28, 46, 0.6);
             --bg-input: #111b2e;
@@ -20,24 +37,66 @@
             --accent-secondary: #00d4ff;
             --border-color: rgba(255, 255, 255, 0.1);
             --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-gradient: radial-gradient(circle at top, #111b2e 0%, #060b14 100%);
+            --scrollbar-track: #060b14;
+            --scrollbar-thumb: #2a3b5c;
         }
 
         * { box-sizing: border-box; }
 
+        /* ── Transição de tema ── */
+        body,
+        .grupo-card, .card-mata-mata,
+        .tab-btn, .tab-content,
+        .btn-action, .btn-export, .btn-reset, .btn-theme-toggle,
+        .tabela-classificacao td, .tabela-classificacao th,
+        .jogo-status-bar, .jogo-bloco-wrapper,
+        input[type="number"] {
+            transition: background-color 0.25s ease, background 0.25s ease,
+                        color 0.25s ease, border-color 0.25s ease,
+                        box-shadow 0.25s ease;
+        }
+
+        /* ── Barra de título — sempre escura ── */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: #0d1b2e;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; height: 56px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+        }
+        .btn-theme-toggle {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+            color: #e8f4ff; padding: 6px 14px; border-radius: 20px; cursor: pointer;
+            font-size: 0.82rem; font-weight: 600; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px; white-space: nowrap;
+        }
+        .btn-theme-toggle:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: radial-gradient(circle at top, #111b2e 0%, var(--bg-main) 100%);
+            background: var(--bg-gradient);
             color: var(--text-main);
             margin: 0;
             padding: 15px;
+            padding-top: 72px;
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background 0.4s ease, color 0.3s ease;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: #2a3b5c; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-secondary); }
+
+        /* ── Logo no cabeçalho ── */
+        .header-logo { height: 50px; width: auto; display: block; flex-shrink: 0; }
+        .header-logo .logo-white { fill: #1a2d45; transition: fill 0.3s; }
+        [data-theme="dark"] .header-logo .logo-white { fill: #FEFEFE; }
+        .header-logo .logo-blue { fill: #00AFEF; }
+        .header-logo .logo-yellow { fill: #FFCC29; }
 
         /* Cabeçalho */
         .dashboard-header {
@@ -45,31 +104,40 @@
             justify-content: space-between; align-items: center; gap: 15px;
             flex-wrap: wrap;
         }
-        .dashboard-header h1 { 
-            font-size: 1.8rem; margin: 0; font-weight: 800; 
+        .dashboard-header h1 {
+            font-size: 1.8rem; margin: 0; font-weight: 800;
             background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
-            background-clip: text; /* <--- Adicionamos o padrão oficial aqui */
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .dashboard-header p { color: var(--text-muted); margin: 5px 0 0 0; font-size: 0.85rem; }
 
         .actions-wrapper { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .btn-action {
-            background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent-secondary); color: var(--accent-secondary);
+            background: rgba(74, 163, 232, 0.1); border: 1px solid var(--accent-secondary); color: var(--accent-secondary);
             padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
             transition: all 0.3s ease; display: inline-block; text-align: center;
         }
-        .btn-action:hover { background: var(--accent-secondary); color: #060b14; box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); }
-        
-        .btn-export { background: rgba(0, 255, 135, 0.1); border: 1px solid var(--accent-primary); color: var(--accent-primary); }
-        .btn-export:hover { background: var(--accent-primary); color: #060b14; box-shadow: 0 0 12px rgba(0, 255, 135, 0.3); }
+        .btn-action:hover { background: var(--accent-secondary); color: #ffffff; box-shadow: 0 0 12px rgba(74, 163, 232, 0.3); }
+
+        [data-theme="dark"] .btn-action { background: rgba(0, 212, 255, 0.1); border-color: #00d4ff; color: #00d4ff; }
+        [data-theme="dark"] .btn-action:hover { background: #00d4ff; color: #060b14; }
+
+        .btn-export { background: rgba(42, 125, 212, 0.1); border: 1px solid var(--accent-primary); color: var(--accent-primary); }
+        .btn-export:hover { background: var(--accent-primary); color: #ffffff; box-shadow: 0 0 12px rgba(42, 125, 212, 0.3); }
+
+        [data-theme="dark"] .btn-export { background: rgba(0, 255, 135, 0.1); border-color: #00ff87; color: #00ff87; }
+        [data-theme="dark"] .btn-export:hover { background: #00ff87; color: #060b14; }
 
         .btn-reset {
-            background: rgba(255, 61, 0, 0.1); border: 1px solid #ff3d00; color: #ff3d00;
+            background: rgba(220, 60, 60, 0.08); border: 1px solid #cc4444; color: #cc4444;
             padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease;
         }
-        .btn-reset:hover { background: #ff3d00; color: white; box-shadow: 0 0 12px rgba(255, 61, 0, 0.3); }
+        .btn-reset:hover { background: #cc4444; color: white; box-shadow: 0 0 12px rgba(200, 60, 60, 0.25); }
+
+        [data-theme="dark"] .btn-reset { background: rgba(255, 61, 0, 0.1); border-color: #ff3d00; color: #ff3d00; }
+        [data-theme="dark"] .btn-reset:hover { background: #ff3d00; box-shadow: 0 0 12px rgba(255, 61, 0, 0.3); }
 
         /* Sistema de Abas */
         .tabs-nav {
@@ -88,9 +156,11 @@
             content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 3px;
             background: transparent; border-radius: 3px 3px 0 0; transition: all 0.3s ease;
         }
-        .tab-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+        .tab-btn:hover { color: var(--text-main); background: rgba(100, 160, 220, 0.08); }
+        [data-theme="dark"] .tab-btn:hover { background: rgba(255,255,255,0.05); }
         .tab-btn.active { color: var(--accent-primary); }
-        .tab-btn.active::after { background: var(--accent-primary); box-shadow: 0 0 10px rgba(0, 255, 135, 0.5); }
+        .tab-btn.active::after { background: var(--accent-primary); box-shadow: 0 0 8px rgba(42, 125, 212, 0.35); }
+        [data-theme="dark"] .tab-btn.active::after { box-shadow: 0 0 10px rgba(0, 255, 135, 0.5); }
 
         .tab-content { display: none; animation: fadeIn 0.3s ease; max-width: 100%; margin: 0 auto; }
         .tab-content.active { display: block; }
@@ -104,14 +174,15 @@
         }
 
         .grupo-card {
-            flex: 0 0 380px; 
+            flex: 0 0 380px;
             scroll-snap-align: start;
             background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border-radius: 16px; border: 1px solid var(--border-color); padding: 18px;
-            box-shadow: var(--card-shadow); transition: transform 0.3s ease, border-color 0.3s;
+            box-shadow: var(--card-shadow); transition: transform 0.3s ease, border-color 0.3s, background 0.4s;
         }
-        .grupo-card:hover, .card-mata-mata:hover { border-color: rgba(0, 212, 255, 0.3); }
-        .grupo-title { font-size: 1.15rem; color: var(--accent-secondary); margin: 0 0 15px 0; font-weight: 800; text-align: center; }
+        .grupo-card:hover, .card-mata-mata:hover { border-color: rgba(74, 163, 232, 0.5); }
+        [data-theme="dark"] .grupo-card:hover, [data-theme="dark"] .card-mata-mata:hover { border-color: rgba(0, 212, 255, 0.3); }
+        .grupo-title { font-size: 1.15rem; color: var(--accent-primary); margin: 0 0 15px 0; font-weight: 800; text-align: center; }
 
         /* Grid do Mata-Mata */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; width: 100%; }
@@ -119,40 +190,45 @@
             background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border-radius: 16px; border: 1px solid var(--border-color); padding: 18px;
             box-shadow: var(--card-shadow); display: flex; flex-direction: column; align-items: center;
+            transition: background 0.4s;
         }
-        
+
         /* Layout dos Jogos */
         .jogo-status-bar {
             display: flex; justify-content: space-between; align-items: center;
             width: 100%; margin-bottom: 8px; padding: 4px 10px;
-            background: rgba(255, 255, 255, 0.03); border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(100, 160, 220, 0.07); border-radius: 6px;
+            border: 1px solid rgba(100, 160, 220, 0.15);
         }
+        [data-theme="dark"] .jogo-status-bar { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); }
         .jogo-id-label { font-size: 0.65rem; color: var(--accent-secondary); font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
         .jogo-data-label { font-size: 0.7rem; color: var(--accent-primary); font-weight: 600; }
 
-        .card-mata-mata .jogo-status-bar { background: rgba(0, 212, 255, 0.05); border-color: rgba(0, 212, 255, 0.1); margin-bottom: 12px; }
+        .card-mata-mata .jogo-status-bar { background: rgba(74, 163, 232, 0.08); border-color: rgba(74, 163, 232, 0.2); margin-bottom: 12px; }
+        [data-theme="dark"] .card-mata-mata .jogo-status-bar { background: rgba(0, 212, 255, 0.05); border-color: rgba(0, 212, 255, 0.1); }
 
         .jogo-bloco-wrapper { width: 100%; margin-bottom: 12px; }
         .jogo-bloco-wrapper:last-of-type { margin-bottom: 0; }
         .jogo-linha { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-        
+
         .time-box { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
         .time-box.mandante { justify-content: flex-end; }
         .time-box.visitante { justify-content: flex-start; }
 
-        .flag { width: 24px; height: 16px; object-fit: cover; border-radius: 3px; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+        .flag { width: 24px; height: 16px; object-fit: cover; border-radius: 3px; box-shadow: 0 0 4px rgba(0,0,0,0.15); }
         .time-nome { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .time-nome.placeholder { color: var(--text-muted); font-weight: 400; font-style: italic; }
 
         .placar-wrapper { display: flex; align-items: center; gap: 6px; padding: 0 8px; }
         .input-placar {
             width: 38px; height: 34px; background-color: var(--bg-input);
-            border: 1px solid rgba(255,255,255,0.1); color: var(--accent-primary);
-            text-align: center; font-size: 1.1rem; font-weight: 700; border-radius: 6px; 
+            border: 1px solid rgba(100, 160, 220, 0.35); color: var(--accent-primary);
+            text-align: center; font-size: 1.1rem; font-weight: 700; border-radius: 6px;
             outline: none; transition: all 0.2s;
         }
-        .input-placar:focus { border-color: var(--accent-primary); box-shadow: 0 0 8px rgba(0, 255, 135, 0.3); }
+        [data-theme="dark"] .input-placar { border-color: rgba(255,255,255,0.1); }
+        .input-placar:focus { border-color: var(--accent-primary); box-shadow: 0 0 8px rgba(42, 125, 212, 0.2); }
+        [data-theme="dark"] .input-placar:focus { box-shadow: 0 0 8px rgba(0, 255, 135, 0.3); }
         .input-placar::-webkit-outer-spin-button, .input-placar::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .vs-divisor { color: var(--text-muted); font-size: 0.75rem; font-weight: bold; }
 
@@ -160,30 +236,41 @@
         .tabela-classificacao { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
         .tabela-classificacao th { color: var(--text-muted); text-align: center; padding: 6px 2px; border-bottom: 1px solid var(--border-color); font-weight: 600; }
         .tabela-classificacao th:nth-child(2) { text-align: left; }
-        .tabela-classificacao td { padding: 6px 2px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .tabela-classificacao td { padding: 6px 2px; text-align: center; border-bottom: 1px solid rgba(100, 160, 220, 0.08); }
+        [data-theme="dark"] .tabela-classificacao td { border-bottom-color: rgba(255,255,255,0.03); }
         .tabela-classificacao td:nth-child(2) { text-align: left; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-        .tabela-classificacao tr:nth-child(1) td, .tabela-classificacao tr:nth-child(2) td { background: rgba(0, 255, 135, 0.04); }
-        .tabela-classificacao tr:nth-child(3) td { background: rgba(0, 212, 255, 0.04); }
+        .tabela-classificacao tr:nth-child(1) td, .tabela-classificacao tr:nth-child(2) td { background: rgba(42, 125, 212, 0.06); }
+        [data-theme="dark"] .tabela-classificacao tr:nth-child(1) td, [data-theme="dark"] .tabela-classificacao tr:nth-child(2) td { background: rgba(0, 255, 135, 0.04); }
+        .tabela-classificacao tr:nth-child(3) td { background: rgba(74, 163, 232, 0.05); }
+        [data-theme="dark"] .tabela-classificacao tr:nth-child(3) td { background: rgba(0, 212, 255, 0.04); }
         .tabela-classificacao tr:nth-child(1) td:first-child, .tabela-classificacao tr:nth-child(2) td:first-child { color: var(--accent-primary); font-weight: bold; }
         .tabela-classificacao tr:nth-child(3) td:first-child { color: var(--accent-secondary); font-weight: bold; }
 
-        .alert-tie { font-size: 0.75rem; color: #ffab00; text-align: center; margin-top: 10px; display: none; width: 100%; }
+        .alert-tie { font-size: 0.75rem; color: #e07800; text-align: center; margin-top: 10px; display: none; width: 100%; }
 
         @media (max-width: 1024px) { .dashboard-header { flex-direction: column; text-align: center; gap: 15px; } .actions-wrapper { justify-content: center; } }
         @media (max-width: 480px) {
-            body { padding: 10px; }
+            body { padding: 10px; padding-top: 72px; }
             .grupo-card { flex: 0 0 88vw; }
             .grid-container { grid-template-columns: 1fr; }
+            .top-bar { padding: 0 12px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Barra de título — sempre escura -->
+    <header class="top-bar">
+        <button class="btn-theme-toggle" onclick="alternarTema()" id="btn-tema">🌙 Tema Escuro</button>
+    </header>
+
     <div class="dashboard-header">
         <div>
             <h1>Copa do Mundo 2026™</h1>
-            <p>Simulador Dinâmico • Anote ou simule os resultados dos jogos.</p>
+            <p>Anote ou simule os resultados dos jogos.</p>
         </div>
+        <!-- Logo centralizado entre título e botões -->
+        <img class="header-logo" src="rildon-logo.svg" alt="Rildon Eletropeças">
         <div class="actions-wrapper">
             <button class="btn-action btn-export" onclick="exportarBackup()">💾 Exportar</button>
             <label for="input-import" class="btn-action">📂 Importar</label>
@@ -594,6 +681,32 @@
         }
 
         document.addEventListener('DOMContentLoaded', init);
+
+        function alternarTema() {
+            const html = document.documentElement;
+            const btn = document.getElementById('btn-tema');
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙 Tema Escuro';
+                localStorage.setItem('tema', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Tema Claro';
+                localStorage.setItem('tema', 'dark');
+            }
+        }
+
+        (function() {
+            const tema = localStorage.getItem('tema');
+            if (tema === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.addEventListener('DOMContentLoaded', () => {
+                    const btn = document.getElementById('btn-tema');
+                    if (btn) btn.textContent = '☀️ Tema Claro';
+                });
+            }
+        })();
     </script>
 </body>
 </html>
