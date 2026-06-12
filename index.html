@@ -105,11 +105,11 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-secondary); }
 
         /* ── Logo no cabeçalho ── */
-        .header-logo { height: 50px; width: auto; display: block; flex-shrink: 0; }
-        .header-logo .logo-white { fill: #1a2d45; transition: fill 0.3s; }
-        [data-theme="dark"] .header-logo .logo-white { fill: #FEFEFE; }
-        .header-logo .logo-blue { fill: #00AFEF; }
-        .header-logo .logo-yellow { fill: #FFCC29; }
+        .header-logo { height: 50px; width: auto; display: block; flex-shrink: 0; transition: opacity 0.3s ease; }
+        .logo-escuro { display: none; }
+        .logo-claro  { display: block; }
+        [data-theme="dark"] .logo-escuro { display: block; }
+        [data-theme="dark"] .logo-claro  { display: none; }
 
         /* Cabeçalho */
         .dashboard-header {
@@ -285,8 +285,9 @@
             <h1>Copa do Mundo 2026™</h1>
             <p>Anote ou simule os resultados dos jogos.</p>
         </div>
-        <!-- Logo centralizado entre título e botões -->
-        <img class="header-logo" src="rildon-logo.svg" alt="Rildon Eletropeças">
+        <!-- Logo: claro = colorida, escuro = branca -->
+        <img class="header-logo logo-claro" src="rildon-logo-claro.png" alt="Rildon Eletropeças">
+        <img class="header-logo logo-escuro" src="rildon-logo.svg" alt="Rildon Eletropeças">
         <div class="actions-wrapper">
             <button class="btn-action btn-export" onclick="exportarBackup()">💾 Exportar</button>
             <label for="input-import" class="btn-action">📂 Importar</label>
