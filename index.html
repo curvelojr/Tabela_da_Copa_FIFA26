@@ -575,26 +575,29 @@
                 else melhoresTerceiros.push({ nome: null, origem: `Melhor 3º (${i+1})` });
             }
 
-            // Chaveamento oficial FIFA 2026 (Matches 73-88)
-            // primeiros[X] = 1º do Grupo X (A=0,B=1,C=2,D=3,E=4,F=5,G=6,H=7,I=8,J=9,K=10,L=11)
-            // segundos[X]  = 2º do Grupo X
+            // Chaveamento oficial FIFA 2026 — ordem ajustada para pareamento sequencial correto
+            // Cada par (pos 1+2, 3+4, ...) se encontra nas oitavas conforme bracket oficial
+            // Oitavas: J89=J74×J77 | J90=J73×J75 | J93=J83×J84 | J94=J81×J82
+            //          J91=J76×J78 | J92=J79×J80 | J95=J86×J88 | J96=J85×J87
+            // Quartas: J97=J89×J90 | J98=J93×J94 | J99=J91×J92 | J100=J95×J96
+            // Semis:   J101=J97×J98 | J102=J99×J100
             const matchups = [
-                [segundos[0],   segundos[1]],           // M73: 2ºA × 2ºB
-                [primeiros[4],  melhoresTerceiros[0]],  // M74: 1ºE × melhor 3º
-                [primeiros[5],  segundos[2]],           // M75: 1ºF × 2ºC
-                [primeiros[2],  segundos[5]],           // M76: 1ºC × 2ºF
-                [primeiros[8],  melhoresTerceiros[1]],  // M77: 1ºI × melhor 3º
-                [segundos[4],   segundos[8]],           // M78: 2ºE × 2ºI
-                [primeiros[0],  melhoresTerceiros[2]],  // M79: 1ºA × melhor 3º
-                [primeiros[11], melhoresTerceiros[3]],  // M80: 1ºL × melhor 3º
-                [primeiros[3],  melhoresTerceiros[4]],  // M81: 1ºD × melhor 3º
-                [primeiros[6],  melhoresTerceiros[5]],  // M82: 1ºG × melhor 3º
-                [segundos[10],  segundos[11]],          // M83: 2ºK × 2ºL
-                [primeiros[7],  segundos[9]],           // M84: 1ºH × 2ºJ
-                [primeiros[1],  melhoresTerceiros[6]],  // M85: 1ºB × melhor 3º
-                [primeiros[9],  segundos[7]],           // M86: 1ºJ × 2ºH
-                [primeiros[10], melhoresTerceiros[7]],  // M87: 1ºK × melhor 3º
-                [segundos[3],   segundos[6]],           // M88: 2ºD × 2ºG
+                [primeiros[4],  melhoresTerceiros[0]],  // J74:  1ºE × 3º(A/B/C/D/F)  → oitavas J89
+                [primeiros[8],  melhoresTerceiros[1]],  // J77:  1ºI × 3º(C/D/F/G/H)  → oitavas J89
+                [segundos[0],   segundos[1]],           // J73:  2ºA × 2ºB             → oitavas J90
+                [primeiros[5],  segundos[2]],           // J75:  1ºF × 2ºC             → oitavas J90
+                [segundos[10],  segundos[11]],          // J83:  2ºK × 2ºL             → oitavas J93
+                [primeiros[7],  segundos[9]],           // J84:  1ºH × 2ºJ             → oitavas J93
+                [primeiros[3],  melhoresTerceiros[2]],  // J81:  1ºD(EUA) × 3º(B/E/F/I/J) → oitavas J94
+                [primeiros[6],  melhoresTerceiros[3]],  // J82:  1ºG × 3º(A/E/H/I/J)  → oitavas J94
+                [primeiros[2],  segundos[5]],           // J76:  1ºC(Brasil) × 2ºF    → oitavas J91
+                [segundos[4],   segundos[8]],           // J78:  2ºE × 2ºI             → oitavas J91
+                [primeiros[0],  melhoresTerceiros[4]],  // J79:  1ºA(México) × 3º(C/E/F/H/I) → oitavas J92
+                [primeiros[11], melhoresTerceiros[5]],  // J80:  1ºL × 3º(E/H/I/J/K)  → oitavas J92
+                [primeiros[9],  segundos[7]],           // J86:  1ºJ(Argentina) × 2ºH → oitavas J95
+                [segundos[3],   segundos[6]],           // J88:  2ºD × 2ºG             → oitavas J95
+                [primeiros[1],  melhoresTerceiros[6]],  // J85:  1ºB × 3º(E/F/G/I/J)  → oitavas J96
+                [primeiros[10], melhoresTerceiros[7]],  // J87:  1ºK × 3º(D/E/I/J/L)  → oitavas J96
             ];
 
             matchups.forEach((match, idx) => {
