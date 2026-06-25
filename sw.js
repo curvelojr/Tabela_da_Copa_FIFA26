@@ -1,4 +1,4 @@
-const CACHE_NAME = 'simulador-copa-v5';
+const CACHE_NAME = 'simulador-copa-v6';
 const ASSETS = [
     './',
     './index.html',
