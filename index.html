@@ -575,29 +575,24 @@
                 else melhoresTerceiros.push({ nome: null, origem: `Melhor 3º (${i+1})` });
             }
 
-            // Chaveamento oficial FIFA 2026 — ordem ajustada para pareamento sequencial correto
-            // Cada par (pos 1+2, 3+4, ...) se encontra nas oitavas conforme bracket oficial
-            // Oitavas: J89=J74×J77 | J90=J73×J75 | J93=J83×J84 | J94=J81×J82
-            //          J91=J76×J78 | J92=J79×J80 | J95=J86×J88 | J96=J85×J87
-            // Quartas: J97=J89×J90 | J98=J93×J94 | J99=J91×J92 | J100=J95×J96
-            // Semis:   J101=J97×J98 | J102=J99×J100
+            // Chaveamento oficial FIFA 2026 — ordem oficial dos jogos (J73 a J88)
             const matchups = [
-                [primeiros[4],  melhoresTerceiros[0]],  // J74:  1ºE × 3º(A/B/C/D/F)  → oitavas J89
-                [primeiros[8],  melhoresTerceiros[1]],  // J77:  1ºI × 3º(C/D/F/G/H)  → oitavas J89
-                [segundos[0],   segundos[1]],           // J73:  2ºA × 2ºB             → oitavas J90
-                [primeiros[5],  segundos[2]],           // J75:  1ºF × 2ºC             → oitavas J90
-                [segundos[10],  segundos[11]],          // J83:  2ºK × 2ºL             → oitavas J93
-                [primeiros[7],  segundos[9]],           // J84:  1ºH × 2ºJ             → oitavas J93
-                [primeiros[3],  melhoresTerceiros[2]],  // J81:  1ºD(EUA) × 3º(B/E/F/I/J) → oitavas J94
-                [primeiros[6],  melhoresTerceiros[3]],  // J82:  1ºG × 3º(A/E/H/I/J)  → oitavas J94
-                [primeiros[2],  segundos[5]],           // J76:  1ºC(Brasil) × 2ºF    → oitavas J91
-                [segundos[4],   segundos[8]],           // J78:  2ºE × 2ºI             → oitavas J91
-                [primeiros[0],  melhoresTerceiros[4]],  // J79:  1ºA(México) × 3º(C/E/F/H/I) → oitavas J92
-                [primeiros[11], melhoresTerceiros[5]],  // J80:  1ºL × 3º(E/H/I/J/K)  → oitavas J92
-                [primeiros[9],  segundos[7]],           // J86:  1ºJ(Argentina) × 2ºH → oitavas J95
-                [segundos[3],   segundos[6]],           // J88:  2ºD × 2ºG             → oitavas J95
-                [primeiros[1],  melhoresTerceiros[6]],  // J85:  1ºB × 3º(E/F/G/I/J)  → oitavas J96
-                [primeiros[10], melhoresTerceiros[7]],  // J87:  1ºK × 3º(D/E/I/J/L)  → oitavas J96
+                [segundos[0],   segundos[1]],           // J73:  2ºA × 2ºB
+                [primeiros[4],  melhoresTerceiros[0]],  // J74:  1ºE × 3º(A/B/C/D/F)
+                [primeiros[5],  segundos[2]],           // J75:  1ºF × 2ºC
+                [primeiros[2],  segundos[5]],           // J76:  1ºC(Brasil) × 2ºF
+                [primeiros[8],  melhoresTerceiros[1]],  // J77:  1ºI × 3º(C/D/F/G/H)
+                [segundos[4],   segundos[8]],           // J78:  2ºE × 2ºI
+                [primeiros[0],  melhoresTerceiros[2]],  // J79:  1ºA(México) × 3º(C/E/F/H/I)
+                [primeiros[11], melhoresTerceiros[3]],  // J80:  1ºL × 3º(E/H/I/J/K)
+                [primeiros[3],  melhoresTerceiros[4]],  // J81:  1ºD(EUA) × 3º(B/E/F/I/J)
+                [primeiros[6],  melhoresTerceiros[5]],  // J82:  1ºG × 3º(A/E/H/I/J)
+                [segundos[10],  segundos[11]],          // J83:  2ºK × 2ºL
+                [primeiros[7],  segundos[9]],           // J84:  1ºH × 2ºJ
+                [primeiros[1],  melhoresTerceiros[6]],  // J85:  1ºB × 3º(E/F/G/I/J)
+                [primeiros[9],  segundos[7]],           // J86:  1ºJ(Argentina) × 2ºH
+                [primeiros[10], melhoresTerceiros[7]],  // J87:  1ºK × 3º(D/E/I/J/L)
+                [segundos[3],   segundos[6]],           // J88:  2ºD × 2ºG
             ];
 
             matchups.forEach((match, idx) => {
@@ -624,41 +619,72 @@
         }
 
         function propagarVencedores() {
-            for (let f = 0; f < fasesMata.length - 1; f++) {
-                const currentFase = fasesMata[f].id;
-                const nextFase = fasesMata[f+1].id;
-                const numMatches = fasesMata[f].qtd;
+            // Mapa explícito do bracket oficial FIFA 2026
+            // [fase_origem, jogo, fase_destino, jogo_destino, slot]
+            const bracketMap = [
+                // 16-avos → Oitavas
+                ['fase16',  1, 'oitavas', 2, 'm'],  // J73 → J90 'm'
+                ['fase16',  2, 'oitavas', 1, 'm'],  // J74 → J89 'm'
+                ['fase16',  3, 'oitavas', 2, 'v'],  // J75 → J90 'v'
+                ['fase16',  4, 'oitavas', 5, 'm'],  // J76 → J91 'm' (Brasil)
+                ['fase16',  5, 'oitavas', 1, 'v'],  // J77 → J89 'v'
+                ['fase16',  6, 'oitavas', 5, 'v'],  // J78 → J91 'v'
+                ['fase16',  7, 'oitavas', 6, 'm'],  // J79 → J92 'm' (México)
+                ['fase16',  8, 'oitavas', 6, 'v'],  // J80 → J92 'v'
+                ['fase16',  9, 'oitavas', 4, 'm'],  // J81 → J94 'm' (EUA)
+                ['fase16', 10, 'oitavas', 4, 'v'],  // J82 → J94 'v'
+                ['fase16', 11, 'oitavas', 3, 'm'],  // J83 → J93 'm'
+                ['fase16', 12, 'oitavas', 3, 'v'],  // J84 → J93 'v'
+                ['fase16', 13, 'oitavas', 8, 'm'],  // J85 → J96 'm'
+                ['fase16', 14, 'oitavas', 7, 'm'],  // J86 → J95 'm' (Argentina)
+                ['fase16', 15, 'oitavas', 8, 'v'],  // J87 → J96 'v'
+                ['fase16', 16, 'oitavas', 7, 'v'],  // J88 → J95 'v'
+                // Oitavas → Quartas
+                ['oitavas', 1, 'quartas', 1, 'm'],  // J89 → J97 'm'
+                ['oitavas', 2, 'quartas', 1, 'v'],  // J90 → J97 'v'
+                ['oitavas', 3, 'quartas', 2, 'm'],  // J93 → J98 'm'
+                ['oitavas', 4, 'quartas', 2, 'v'],  // J94 → J98 'v'
+                ['oitavas', 5, 'quartas', 3, 'm'],  // J91 → J99 'm'
+                ['oitavas', 6, 'quartas', 3, 'v'],  // J92 → J99 'v'
+                ['oitavas', 7, 'quartas', 4, 'm'],  // J95 → J100 'm'
+                ['oitavas', 8, 'quartas', 4, 'v'],  // J96 → J100 'v'
+                // Quartas → Semis
+                ['quartas', 1, 'semis', 1, 'm'],    // J97 → J101 'm'
+                ['quartas', 2, 'semis', 1, 'v'],    // J98 → J101 'v'
+                ['quartas', 3, 'semis', 2, 'm'],    // J99 → J102 'm'
+                ['quartas', 4, 'semis', 2, 'v'],    // J100 → J102 'v'
+                // Semis → Final
+                ['semis', 1, 'final', 1, 'm'],      // J101 → Final 'm'
+                ['semis', 2, 'final', 1, 'v'],      // J102 → Final 'v'
+            ];
 
-                for (let m = 1; m <= numMatches; m++) {
-                    const elScoreM = document.getElementById(`${currentFase}_j${m}_m_score`);
-                    const elScoreV = document.getElementById(`${currentFase}_j${m}_v_score`);
-                    const elNameM = document.getElementById(`${currentFase}_j${m}_m_nome`);
-                    const elNameV = document.getElementById(`${currentFase}_j${m}_v_nome`);
-                    const alertEl = document.getElementById(`${currentFase}_j${m}_alert`);
+            bracketMap.forEach(([srcFase, srcJogo, dstFase, dstJogo, dstSlot]) => {
+                const elScoreM = document.getElementById(`${srcFase}_j${srcJogo}_m_score`);
+                const elScoreV = document.getElementById(`${srcFase}_j${srcJogo}_v_score`);
+                const elNameM  = document.getElementById(`${srcFase}_j${srcJogo}_m_nome`);
+                const elNameV  = document.getElementById(`${srcFase}_j${srcJogo}_v_nome`);
+                const alertEl  = document.getElementById(`${srcFase}_j${srcJogo}_alert`);
 
-                    if(!elScoreM || !elScoreV || !elNameM || !elNameV) continue;
+                if (!elScoreM || !elScoreV || !elNameM || !elNameV) return;
 
-                    const scoreM = elScoreM.value; const scoreV = elScoreV.value;
-                    const nameM = elNameM.innerText; const nameV = elNameV.innerText;
-                    const isPlaceHolderM = elNameM.classList.contains('placeholder');
-                    const isPlaceHolderV = elNameV.classList.contains('placeholder');
+                const scoreM = elScoreM.value, scoreV = elScoreV.value;
+                const nameM  = elNameM.innerText, nameV = elNameV.innerText;
+                const phM = elNameM.classList.contains('placeholder');
+                const phV = elNameV.classList.contains('placeholder');
 
-                    let winnerObj = null;
+                let winnerObj = null;
+                if (scoreM !== '' && scoreV !== '' && !phM && !phV) {
+                    const mVal = parseInt(scoreM, 10), vVal = parseInt(scoreV, 10);
+                    if (!isNaN(mVal) && !isNaN(vVal)) {
+                        if (mVal > vVal)      { winnerObj = { nome: nameM }; if (alertEl) alertEl.style.display = 'none'; }
+                        else if (vVal > mVal) { winnerObj = { nome: nameV }; if (alertEl) alertEl.style.display = 'none'; }
+                        else                  { if (alertEl) alertEl.style.display = 'block'; }
+                    }
+                } else { if (alertEl) alertEl.style.display = 'none'; }
 
-                    if (scoreM !== "" && scoreV !== "" && !isPlaceHolderM && !isPlaceHolderV) {
-                        const mVal = parseInt(scoreM, 10); const vVal = parseInt(scoreV, 10);
-                        if(!isNaN(mVal) && !isNaN(vVal)) {
-                            if(mVal > vVal) { winnerObj = { nome: nameM }; alertEl.style.display = 'none'; } 
-                            else if(vVal > mVal) { winnerObj = { nome: nameV }; alertEl.style.display = 'none'; } 
-                            else { alertEl.style.display = 'block'; }
-                        }
-                    } else { if(alertEl) alertEl.style.display = 'none'; }
-
-                    const nextMatch = Math.ceil(m / 2);
-                    const slotPrefix = (m % 2 !== 0) ? 'm' : 'v';
-                    setMataMataTeam(nextFase, nextMatch, slotPrefix, winnerObj || { origem: `Vencedor Jogo ${m}` });
-                }
-            }
+                setMataMataTeam(dstFase, dstJogo, dstSlot,
+                    winnerObj || { origem: `Vencedor Jogo ${srcJogo}` });
+            });
         }
 
         function restaurarDados() {
